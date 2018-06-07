@@ -27,8 +27,11 @@ app.get('/login', (req, res) => {
     res.redirect(url);
 });
 app.get('/oauth2callback', async (req, res) => {
-    // TODO: NOT AUTHORIZED
     const code = req.query.code;
+    if (code === undefined) {
+        res.send('UNAUTHORIZED');
+        return;
+    }
     const user = req.query.state; // TODO: DECRYPT
     try {
         const { tokens } = await oauth2Client.getToken(code)
@@ -38,11 +41,10 @@ app.get('/oauth2callback', async (req, res) => {
         conf.set('access_token', access_token);
         conf.set('refresh_token', refresh_token);
         conf.set('expiry_date', expiry_date_string);
-        res.send('Successfully logged in');
+        res.send('SUCCESS');
     } catch(error) {
-        res.send(error);
+        res.send(`ERROR: ${error}`);
     }
 });
 // TODO: WORKER PROCESS TO REFRESH SOON TO EXPIRE TOKENS
-// TODO: USE WITH IMAP CLIENT
 app.listen(3000, () => console.log('Example app listening on port 3000!'));
